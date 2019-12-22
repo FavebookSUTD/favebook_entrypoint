@@ -115,19 +115,39 @@ We can see that the new book has been added in
 
 ## 6.2 Backend requirements
 
-### 6.2.1 Deploying MongoDB
+### 6.2.1 Deployment 
+
+For deployment, we make use of Cloud Formation which is a declarative language to specify the requirements of our instances. We go one level further by using Nested Cloud Formation that allows us to specify the dependencies within our services. In the Nested Cloud Formation framework, we have a parent stack, which you can think of as the dependency. (for there to be a child, there must be a parent!)
+
+When the parents launch successfully, we are take the URL that returns from the launch and feed it as a parameter into the dependent services. 
+
+As required, our MongoDB, MySQL, Flask apps, React Apps and Spark Clusters all run on separate server instances that might prove to be useful for us in the future if we need more refined control over the number of instances to launch for each service. 
+
+### 6.2.2 MongoDB
+
+Our MongoDB contains 1. Kindle Books metadata as well as 2. Logs. We chose for MongoDB to contain such data as the logs are less structured and have more variance. Choosing NoSQL gives us the flexibility to store our data in a "lazy" manner and to process it later when we have a use case for them. 
+
+### 6.2.3 MySQL
+
+Our MySQL DB contains `historical_reviews`, `live_reviews`, `user`, `revoked_tokens` as well as `favourites`. 
+
+We made the first important, but easy choice of having `live_reviews` in MySQL, in a separate table than historical reviews. This was because the data we wanted to store in `historical_reviews`was not as all the fields we wanted for `live_review`. In particular, our current system does not care if other users found a particular review useful or not. 
+
+Secondly, we decided to have the User data stored in MySQL. The first use case of `User` is for authentication purpose.  Also, one of our goals was to make the books platform resemble a social network which revolves around the user, as much as possible. This will possibly require us to make a lot of joins around the User relation when trying to find out which books they reviewed or favourited. 
+
+Lastly, we have a `revoked_token` table. Whenever a user logs out, he essentially adds his current token into this table, thus revoking it. This will remove any authentication ability for the token. The frontend will then redirect the user to login again upon receiving a `403 forbidden error message from the backend`.
+
+While MySQL is powerful, we felt the need for more flexible schemas as we taked about more social features within **Favebook**. In the future, we could possibly integrate more graph-based databases such as Neo4J to model how users follow or look at each others profile With this type of data, we can do more social related analytics and push more social related features. 
 
 
 
-### 6.2.2 Deploying MySQL
+### 6.2.4 Flask application
 
+Our Flask contains all the buiness logic and interfaces with both the MySQL database and the MongoDB database. It does so by using a driver known as Pymongo for MongoDB as well as an **Object Relation Mapper (ORM)** known as SqlAlchemy to interface with MySQL. 
 
+The ORM allows us to access the Pythonic representation of a relation in Python. It proved to be convenient for us and a good way to align our thinking of the Relation model with Object Oriented thinking when planning to scale our app. 
 
-### 6.2.3 Deploying the flask application
-
-
-
-### 6.2.4 Logging
+### 6.2.5 Logging
 
 To log the API calls, we used Python's inbuilt logger to register that there has been an API call. We create a class for the specific logger handler that points to the **<u>Mongo collection</u>** for end points and writes to it for each API call. The code for the logger handler initialization can be found in `__init__.py` while the logging class code can be found in `logging_db.py`. We call the logger before each API call by specifying the `@app.before_request` decorator.
 
@@ -303,7 +323,7 @@ Users with accounts have elevated privileges. To authenticate users, we employ a
 
 For the database component of this, users have to first create an account. We set the column to be unique to ensure that users cannot create accounts with the same username and email. We do this by setting the sql column to `unique=True`. The codes can be found in `auth.py` and `models.py`
 
-Upon creation of an account or logging in, we create a JWT token which has an expiry. For development purposes we set this to 10 days.
+Upon creation of an account or logging in, we create a JWT token which has an expiry. Currently, we set this to 10 days. We understand that the standard practice for expiry is anything between 3 days to 30 days. 
 
 We also have a built in mechanism to handle user log outs and expired tokens. We create a table for revoked_tokens. Upon logging out or token expiry, the token will be added in as a row into the  `RevokedTokenModel` table.
 
@@ -311,7 +331,9 @@ We also have a built in mechanism to handle user log outs and expired tokens. We
 
 Enhancement from the base project requirement. 
 
-The adding books feature is an interesting feature that we added because it only allows users to add real books. We do this by using the Google Books API. We fetch 3 books from the Google API, and we prompt the user to select one of these books that were looked up. When they select a book, the Google API actually provides full information about a book such as the asin number and the title. This ensures that only valid books are added into the database. Ehancement and screenshots of the feature is already added Section 6.1.3
+The adding books feature is an interesting feature that we added because it only allows users to add real books. We do this by using the **Google Books API**. In terms of user experience, no user will have to manually input all the book details such as `imUrl` and author name on their own. Secondly, we also do not allow for rouge admins to insert books that do not exists. For readers, this is especially important to build trust for the platform. 
+
+We fetch top 3 books from the Google Books API that we filter based on relevance. We then prompt the user to select one of these books that were looked up. When they select a book, the Google API actually provides full information about a book such as the asin number and the title. This ensures that only valid books are added into the database. Ehancement and screenshots of the feature is already added Section 6.1.3
 
 ### 7.1.4 Favorite books
 
@@ -359,6 +381,13 @@ book_data = list(books.find({"$or": [{"$text": {"$search": prefix}}, {"title": r
 ```
 
 A screenshot of how it works is shown below 
+
+There are a few things this autocomplete does which we are quite happy with: 
+
+1. It does a **Each Word Prefix Match**. For example `Harry Potter and the Goblet of Fire` can be found by typing `Go` as `Go` matches with `Goblet`. 
+2. It does a **Fuzzy match** that does matching based on edit distance. For example search `Giblet` could also give you `Harry Potter and the Goblet of Fire` 
+
+**This is all possible with MongoDB's text index that allows for such efficient searching**
 
 ![](assets/7_1_7_autocomplete.PNG)
 
