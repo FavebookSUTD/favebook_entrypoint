@@ -9,7 +9,11 @@ Note: We put all the code in GitLab because a few of our files exceed GitHub's l
 
 # 1. Video demonstration
 
+The video below shows the admin page which has the features for add books, logging and running the Spark clusters
+
 [![Click to watch video!](assets/youtube_thumbnail.png)](https://youtu.be/GqMNWvuP9bU)
+
+We have another portal for normal users where they can add reviews, search for books, fave books, view other's profiles. Do check it out when you run the auto scripts! Take note that this other portal has a different endpoint.
 
 # 2. Purpose of the readme
 
@@ -40,9 +44,13 @@ Also prepare your AWS credentials. We will need the
 
 # 4. Launching the set-up scripts (Instructions)
 
-To run the script run the following `py databasesetupcloud.py <aws_accesskey_id> <aws_secret_access_key>`
+1. Navigate to the repo (cd favebook_entrypoint)
+ 2. Run command `py stacksetup.py <ACCESS KEY> <SECRET KEY>`
+ 3. Wait for approximately 10-15 minutes for the stack to set up and the databases to be seeded.
+ 4. The links for the user page, admin page, Spark namenode and Flask backend will be printed in the command line after the stack has been created.
+ 5. To log in as a user and as an admin, please register as a user on the frontend page and use those credentials.
 
-- Example: `py databasesetupcloud.py helloIAmTheAccessKey helloIAmTheSecretAccessKey`
+- Example: `py stacksetup.py helloIAmTheAccessKey helloIAmTheSecretAccessKey`
 - The resulting IPs are found below
 - The Spark Public IP will be used to view the analytics results (Details on where to find the results are found in section 6.3.5 and 6.3.6)
 
@@ -331,6 +339,10 @@ Upon running the tfidf code, we get the following result (Truncated), The screen
 ```
 
 The full result can be found in `hdfs://<some_ip_of_name_node>:9000/reviews_tfidf.json'`
+
+A screenshot of the results is shown below
+
+![](assets/tfidf.jpg)
 
 # 7. Bonus features
 
