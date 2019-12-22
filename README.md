@@ -1,10 +1,15 @@
 Team members: Betty, Eda Tan, Enna Zhou, Glenn Chia, Lionell Loh, Tan Yi Xuan, Tay Tsu Shieh 
 
-Note: We put all the code in GitLab because a few of our files exceed GitHub's limits and the commits are too big. We do not want to remove the Git history. Hence, the GitHub just hosts the set up scripts and the GitLab contains the code and the associated logic. The Gitlab link is found at 
+Note: We put all the code in GitLab because a few of our files exceed GitHub's limits and the commits are too big. We do not want to remove the Git history. Hence, the GitHub just hosts the set up scripts and the GitLab contains the code and the associated logic. For convenience, we have copy and pasted the relevant codes (The ones with the logic) to Github
+
+- Backend (production): https://github.com/FavebookSUTD/favebook-backend
+- Backend (analytics): https://github.com/FavebookSUTD/favebook_backend_analytics
+- Frontend (non admin - for base features like add books): https://github.com/FavebookSUTD/favebook_frontend
+- Frontend (admin - to view the logs, run the spark and view its results): https://github.com/FavebookSUTD/favebook_frontend_admin
 
 # 1. Video demonstration
 
-
+[![Click to watch video!](assets/youtube_thumbnail.png)](https://youtu.be/GqMNWvuP9bU)
 
 # 2. Purpose of the readme
 
@@ -24,6 +29,7 @@ The readme serves the following purpose
 To run the scripts please have the following installed 
 
 - Python version 3.7.2 is tested to have worked on our machines
+- Have `boto3` installed
 
 Also prepare your AWS credentials. We will need the 
 
@@ -34,7 +40,13 @@ Also prepare your AWS credentials. We will need the
 
 # 4. Launching the set-up scripts (Instructions)
 
- (TO BE FILLED)
+To run the script run the following `py databasesetupcloud.py <aws_accesskey_id> <aws_secret_access_key>`
+
+- Example: `py databasesetupcloud.py helloIAmTheAccessKey helloIAmTheSecretAccessKey`
+- The resulting IPs are found below
+- The Spark Public IP will be used to view the analytics results (Details on where to find the results are found in section 6.3.5 and 6.3.6)
+
+![](assets/4_run.PNG)
 
 
 
@@ -64,7 +76,7 @@ The following features were required by the project description (For each of the
 
 ### 6.1.1 Viewing reviews
 
-Code for the backend can be found in `book_review.py`
+Code for the backend can be found in `book_review.py`. https://github.com/FavebookSUTD/favebook-backend/blob/master/app/namespaces/book_review.py
 
 When we first enter the home page we see that there are 2 carousels of random picks and top rated picks. Users can select any book from there to view specific details for a book
 
@@ -82,7 +94,7 @@ Clicking the `read more` option shows the full review
 
 ### 6.1.2 Adding reviews
 
-Code for the backend can be found in `book_review.py`
+Code for the backend can be found in `book_review.py`. https://github.com/FavebookSUTD/favebook-backend/blob/master/app/namespaces/book_review.py
 
 For the adding reviews, it continues on the same page as section 6.1.1. We can scroll down to see the adding feature option. Our team decided to only allow adding pages for users who have signed in. Hence, the screenshot below shows the prompt for users who have not signed in
 
@@ -146,19 +158,21 @@ Secondly, we decided to have the User data stored in MySQL. The first use case o
 
 Lastly, we have a `revoked_token` table. Whenever a user logs out, he essentially adds his current token into this table, thus revoking it. This will remove any authentication ability for the token. The frontend will then redirect the user to login again upon receiving a `403 forbidden error message from the backend`.
 
-While MySQL is powerful, we felt the need for more flexible schemas as we taked about more social features within **Favebook**. In the future, we could possibly integrate more graph-based databases such as Neo4J to model how users follow or look at each others profile With this type of data, we can do more social related analytics and push more social related features. 
+While MySQL is powerful, we felt the need for more flexible schemas as we talked about more social features within **Favebook**. In the future, we could possibly integrate more graph-based databases such as Neo4J to model how users follow or look at each others profile With this type of data, we can do more social related analytics and push more social related features. 
 
 
 
 ### 6.2.4 Flask application
 
-Our Flask contains all the buiness logic and interfaces with both the MySQL database and the MongoDB database. It does so by using a driver known as Pymongo for MongoDB as well as an **Object Relation Mapper (ORM)** known as SqlAlchemy to interface with MySQL. 
+Our Flask contains all the business logic and interfaces with both the MySQL database and the MongoDB database. It does so by using a driver known as Pymongo for MongoDB as well as an **Object Relation Mapper (ORM)** known as SqlAlchemy to interface with MySQL. 
 
 The ORM allows us to access the Pythonic representation of a relation in Python. It proved to be convenient for us and a good way to align our thinking of the Relation model with Object Oriented thinking when planning to scale our app. 
 
+The link to the business logic is found here: https://github.com/FavebookSUTD/favebook-backend/tree/master/app
+
 ### 6.2.5 Logging
 
-To log the API calls, we used Python's inbuilt logger to register that there has been an API call. We create a class for the specific logger handler that points to the **<u>Mongo collection</u>** for end points and writes to it for each API call. The code for the logger handler initialization can be found in `__init__.py` while the logging class code can be found in `logging_db.py`. We call the logger before each API call by specifying the `@app.before_request` decorator.
+To log the API calls, we used Python's inbuilt logger to register that there has been an API call. We create a class for the specific logger handler that points to the **<u>Mongo collection</u>** for end points and writes to it for each API call. The code for the logger handler initialization can be found in `__init__.py` while the logging class code can be found in `logging_db.py`(https://github.com/FavebookSUTD/favebook-backend/blob/master/app/logging_db.py). We call the logger before each API call by specifying the `@app.before_request` decorator.
 
 For this project, we retrieved the API parameters by connecting to the `request` object as well as the `record` parameters. With this, we could extract the following
 
@@ -236,7 +250,7 @@ To speed up the scripts, we realized that we did not need all the fields in the 
 
 **<u>Description</u>**
 
-This section describes the calculation of the Pearson correlation. The code can be found in `analytics/control-server/pearson.py`
+This section describes the calculation of the Pearson correlation. The code can be found in `analytics/control-server/pearson.py` https://github.com/FavebookSUTD/favebook_backend_analytics/blob/master/pearson.py
 
 **<u>Explanation</u>**
 
@@ -268,7 +282,7 @@ The number is output to the console which is read the backend script and then re
 
 **<u>Results</u>**
 
-Upon running the Pearson code, we get the following result
+Upon running the Pearson code, we get the following result. (Note that this result is returned from running locally and actually matches the mllib result when we checked) (Note that this result may be different from the one deployed as our team crawled the web to add in genres and titles to existing books and due to some mismatches, some old reviews were dropped).
 
 ```
 pearson correlation >>>0.03771094888383284
@@ -280,7 +294,7 @@ as an extension, we also saved the average review length and the price as we wan
 
 **<u>Description</u>**
 
-This section describes the calculation of the TFIDF. The code can be found in `analytics/control-server/basic_tfidf.py`
+This section describes the calculation of the TFIDF. The code can be found in `analytics/control-server/basic_tfidf.py` https://github.com/FavebookSUTD/favebook_backend_analytics/blob/master/basic_tfidf.py
 
 **<u>Explanation</u>**
 
@@ -332,7 +346,7 @@ Users with accounts have elevated privileges. To authenticate users, we employ a
 
 <img src="assets/7_1_1_loginpage.PNG" style="zoom:60%;" />
 
-For the database component of this, users have to first create an account. We set the column to be unique to ensure that users cannot create accounts with the same username and email. We do this by setting the sql column to `unique=True`. The codes can be found in `auth.py` and `models.py`
+For the database component of this, users have to first create an account. We set the column to be unique to ensure that users cannot create accounts with the same username and email. We do this by setting the sql column to `unique=True`. The codes can be found in `auth.py` (https://github.com/FavebookSUTD/favebook-backend/blob/master/app/namespaces/auth.py) and `models.py` (https://github.com/FavebookSUTD/favebook-backend/blob/master/app/models.py)
 
 Upon creation of an account or logging in, we create a JWT token which has an expiry. Currently, we set this to 10 days. We understand that the standard practice for expiry is anything between 3 days to 30 days. 
 
@@ -348,7 +362,7 @@ We fetch top 3 books from the Google Books API that we filter based on relevance
 
 ### 7.1.4 Favorite books
 
-Code for this section can be found in `book-favourite.py`
+Code for this section can be found in `book-favourite.py` (https://github.com/FavebookSUTD/favebook-backend/blob/master/app/namespaces/book_favourite.py)
 
 For each book in the frontend, we can see the number of people who have favorited it 
 
@@ -374,7 +388,7 @@ We can see all the reviews and faves by a particular user. By clicking on the na
 
 ### 7.1.6 Genre Search
 
-When we click on the Genre tab we can see all the Genres available for the user to select. The backend code for this feature can be found in `book_genre.py`. 
+When we click on the Genre tab we can see all the Genres available for the user to select. The backend code for this feature can be found in `book_genre.py`. (https://github.com/FavebookSUTD/favebook-backend/blob/master/app/namespaces/book_genre.py)
 
 ![](assets/7_1_6_genre.PNG)
 
@@ -426,7 +440,7 @@ We split up our backend files according to the functions that they perform inste
 
 ### 7.2.3 Flask unit testing 
 
-We attempted the TDD framework at a smaller scale to experiment with the process. This enables us to test our API calls against a ground truth. The screenshot of the test cases can be seen below. The test cases can be found in (TO BE FILLED)
+We attempted the TDD framework at a smaller scale to experiment with the process. This enables us to test our API calls against a ground truth. The screenshot of the test cases can be seen below. 
 
 ![](assets/7_2_3_unittest.PNG)
 
@@ -444,7 +458,7 @@ We decided to split the frontend and backend for the application. We used React 
 
 ## 7.5 Convenient features for development
 
-For initial development we wanted a way to prevent environment and installation problems between the front and backend. It is common to have conflicts like Python versions not working with certain packages. Hence, we Containerized the application such that we can just call the docker compose to get both the front and backend up and running. The docker compose file can be found in (TO BE FILLED). Here we have the initial docker compose where we containerized the databases as well 
+For initial development we wanted a way to prevent environment and installation problems between the front and backend. It is common to have conflicts like Python versions not working with certain packages. Hence, we Containerized the application such that we can just call the docker compose to get both the front and backend up and running. The docker compose file can be found in (https://github.com/FavebookSUTD/favebook-backend). Here we have the initial docker compose where we containerized the databases as well 
 
 <img src="assets/7_5_docker_compose.PNG" style="zoom:70%;" />
 
