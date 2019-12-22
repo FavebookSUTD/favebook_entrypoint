@@ -1,3 +1,7 @@
+Team members: Betty, Eda Tan, Enna Zhou, Glenn Chia, Lionell Loh, Tan Yi Xuan, Tay Tsu Shieh 
+
+Note: We put all the code in GitLab because a few of our files exceed GitHub's limits and the commits are too big. We do not want to remove the Git history. Hence, the GitHub just hosts the set up scripts and the GitLab contains the code and the associated logic. The Gitlab link is found at 
+
 # 1. Video demonstration
 
 
@@ -19,9 +23,14 @@ The readme serves the following purpose
 
 To run the scripts please have the following installed 
 
-- Python version XXX (TO BE FILLED)
+- Python version 3.7.2 is tested to have worked on our machines
 
-Also prepare your AWS credentials
+Also prepare your AWS credentials. We will need the 
+
+- aws_acess_key_id
+- aws_secret_access_key
+
+![](assets/3_aws_credentials.PNG)
 
 # 4. Launching the set-up scripts (Instructions)
 
@@ -39,7 +48,7 @@ We had to set-up the databases first because the database URLs are used for the 
 
 ## 5.2 Some nuances
 
-(TO BE FILLED)
+The automated scripts needed to follow a certain sequence because certain services required the endpoints/IP of the others. Hence, as we can see from the diagram above, there are many parameters being passed around. The script only takes in the AWS access key and secret access key without any further prompts. Hence, the entire logic and flow of information has to be in the script.
 
 
 
@@ -214,10 +223,12 @@ Since the Pearson computation requires the reviewText (Present in the MySql data
 
 <img src="assets/6_3_4_etl_pearson.PNG" style="zoom:50%;" />
 
-Although we mentioned that data is rendered via backend call, for grading purposes, the files can be found in the HDFS by going through the following steps (TO BE FILLED)
+Although we mentioned that data is rendered via backend call, for grading purposes, the files can be found in the HDFS by going through the following steps
 
 1. ssh into the name node
 2. Enter the following path 
+   1. For tfidf, the results can be found in `/tmp/reviews_tfidf.json`
+   2. For Pearson, the result can be found in `/tmp/pearson_correlation` which just contains a single number which is the correlation. We also provided the full data for the average review length and price which can be found in `hdfs:///pearson_full.csv/*`
 
 To speed up the scripts, we realized that we did not need all the fields in the MySQL and MongoDB. As such, by pre-specifying the fields we needed, we significantly reduced loading time!
 
@@ -421,7 +432,7 @@ We attempted the TDD framework at a smaller scale to experiment with the process
 
 ## 7.3 Performance optimization
 
-(TO BE FILLED)
+One of the ways to speed up the Spark set up is to do the installations of the required packages in parallel. Some Shell script is pipelined such that one package is being installed while the next is being downloaded. This is designed by modelling the dependencies as a task graph.
 
 
 
